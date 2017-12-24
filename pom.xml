@@ -21,12 +21,11 @@
 
 	<modules>
 		<module>nginx-admin-agent-model</module>
-		<module>nginx-admin-ui</module>
-		<module>nginx-admin-standalone</module>
-		<module>nginx-admin-docker</module>
-		<module>nginx-admin-script</module>
+		<module>nginx-admin-agent-client</module>
     	<module>nginx-admin-agent</module>
-    	<module>nginx-admin-agent-client</module>
+    	<module>nginx-admin-ui</module>
+    	<module>nginx-admin-standalone</module>
+    	
 	</modules>	
 
 	<build>
