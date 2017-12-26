@@ -26,7 +26,7 @@ import com.jslsolucoes.nginx.admin.model.Strategy;
 import com.jslsolucoes.nginx.admin.repository.StrategyRepository;
 
 @RequestScoped
-public class StrategyRepositoryImpl extends RepositoryImpl<Strategy> implements StrategyRepository {
+public class StrategyRepositoryImpl extends HibernateRepositoryImpl<Strategy> implements StrategyRepository {
 
 	public StrategyRepositoryImpl() {
 		// Default constructor

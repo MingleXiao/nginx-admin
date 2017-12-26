@@ -30,7 +30,7 @@ import com.jslsolucoes.nginx.admin.model.Server;
 import com.jslsolucoes.nginx.admin.repository.ServerRepository;
 
 @RequestScoped
-public class ServerRepositoryImpl extends RepositoryImpl<Server> implements ServerRepository {
+public class ServerRepositoryImpl extends HibernateRepositoryImpl<Server> implements ServerRepository {
 
 	public ServerRepositoryImpl() {
 		// Default constructor

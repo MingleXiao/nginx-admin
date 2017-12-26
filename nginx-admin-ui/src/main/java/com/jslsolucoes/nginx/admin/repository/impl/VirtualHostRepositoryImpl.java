@@ -45,7 +45,7 @@ import com.jslsolucoes.nginx.admin.repository.VirtualHostRepository;
 import com.jslsolucoes.nginx.admin.template.TemplateProcessor;
 
 @RequestScoped
-public class VirtualHostRepositoryImpl extends RepositoryImpl<VirtualHost> implements VirtualHostRepository {
+public class VirtualHostRepositoryImpl extends HibernateRepositoryImpl<VirtualHost> implements VirtualHostRepository {
 
 	private ResourceIdentifierRepository resourceIdentifierRepository;
 	private NginxRepository nginxRepository;

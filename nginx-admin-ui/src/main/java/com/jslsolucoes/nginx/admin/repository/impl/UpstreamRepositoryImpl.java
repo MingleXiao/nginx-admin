@@ -40,7 +40,7 @@ import com.jslsolucoes.nginx.admin.repository.UpstreamServerRepository;
 import com.jslsolucoes.nginx.admin.template.TemplateProcessor;
 
 @RequestScoped
-public class UpstreamRepositoryImpl extends RepositoryImpl<Upstream> implements UpstreamRepository {
+public class UpstreamRepositoryImpl extends HibernateRepositoryImpl<Upstream> implements UpstreamRepository {
 
 	private UpstreamServerRepository upstreamServerRepository;
 	private NginxRepository nginxRepository;

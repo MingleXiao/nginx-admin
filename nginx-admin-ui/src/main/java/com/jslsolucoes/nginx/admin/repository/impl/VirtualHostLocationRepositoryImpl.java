@@ -30,7 +30,7 @@ import com.jslsolucoes.nginx.admin.model.VirtualHostLocation;
 import com.jslsolucoes.nginx.admin.repository.VirtualHostLocationRepository;
 
 @RequestScoped
-public class VirtualHostLocationRepositoryImpl extends RepositoryImpl<VirtualHostLocation>
+public class VirtualHostLocationRepositoryImpl extends HibernateRepositoryImpl<VirtualHostLocation>
 		implements VirtualHostLocationRepository {
 
 	public VirtualHostLocationRepositoryImpl() {

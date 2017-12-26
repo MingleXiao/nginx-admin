@@ -25,7 +25,7 @@ import com.jslsolucoes.nginx.admin.model.Smtp;
 import com.jslsolucoes.nginx.admin.repository.SmtpRepository;
 
 @RequestScoped
-public class SmtpRepositoryImpl extends RepositoryImpl<Smtp> implements SmtpRepository {
+public class SmtpRepositoryImpl extends HibernateRepositoryImpl<Smtp> implements SmtpRepository {
 
 	public SmtpRepositoryImpl() {
 		// Default constructor

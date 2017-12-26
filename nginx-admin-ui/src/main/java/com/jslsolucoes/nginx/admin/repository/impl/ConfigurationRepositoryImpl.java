@@ -26,7 +26,7 @@ import com.jslsolucoes.nginx.admin.model.Configuration;
 import com.jslsolucoes.nginx.admin.repository.ConfigurationRepository;
 
 @RequestScoped
-public class ConfigurationRepositoryImpl extends RepositoryImpl<Configuration> implements ConfigurationRepository {
+public class ConfigurationRepositoryImpl extends HibernateRepositoryImpl<Configuration> implements ConfigurationRepository {
 
 	public ConfigurationRepositoryImpl() {
 		// Default constructor

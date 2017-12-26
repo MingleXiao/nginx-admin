@@ -43,7 +43,7 @@ import com.jslsolucoes.nginx.admin.repository.NginxRepository;
 import com.jslsolucoes.nginx.admin.template.TemplateProcessor;
 
 @RequestScoped
-public class NginxRepositoryImpl extends RepositoryImpl<Nginx> implements NginxRepository {
+public class NginxRepositoryImpl extends HibernateRepositoryImpl<Nginx> implements NginxRepository {
 
 	private static Logger logger = LoggerFactory.getLogger(LogRepositoryImpl.class);
 

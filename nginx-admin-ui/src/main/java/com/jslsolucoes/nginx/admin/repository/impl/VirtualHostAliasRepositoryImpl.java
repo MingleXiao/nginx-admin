@@ -30,7 +30,7 @@ import com.jslsolucoes.nginx.admin.model.VirtualHostAlias;
 import com.jslsolucoes.nginx.admin.repository.VirtualHostAliasRepository;
 
 @RequestScoped
-public class VirtualHostAliasRepositoryImpl extends RepositoryImpl<VirtualHostAlias>
+public class VirtualHostAliasRepositoryImpl extends HibernateRepositoryImpl<VirtualHostAlias>
 		implements VirtualHostAliasRepository {
 
 	public VirtualHostAliasRepositoryImpl() {

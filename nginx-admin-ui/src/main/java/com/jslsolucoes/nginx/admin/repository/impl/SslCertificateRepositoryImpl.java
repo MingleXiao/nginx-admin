@@ -36,7 +36,7 @@ import com.jslsolucoes.nginx.admin.repository.ResourceIdentifierRepository;
 import com.jslsolucoes.nginx.admin.repository.SslCertificateRepository;
 
 @RequestScoped
-public class SslCertificateRepositoryImpl extends RepositoryImpl<SslCertificate> implements SslCertificateRepository {
+public class SslCertificateRepositoryImpl extends HibernateRepositoryImpl<SslCertificate> implements SslCertificateRepository {
 
 	private NginxRepository nginxRepository;
 	private ResourceIdentifierRepository resourceIdentifierRepository;

@@ -28,7 +28,7 @@ import com.jslsolucoes.nginx.admin.model.ResourceIdentifier;
 import com.jslsolucoes.nginx.admin.repository.ResourceIdentifierRepository;
 
 @RequestScoped
-public class ResourceIdentifierRepositoryImpl extends RepositoryImpl<ResourceIdentifier>
+public class ResourceIdentifierRepositoryImpl extends HibernateRepositoryImpl<ResourceIdentifier>
 		implements ResourceIdentifierRepository {
 
 	public ResourceIdentifierRepositoryImpl() {

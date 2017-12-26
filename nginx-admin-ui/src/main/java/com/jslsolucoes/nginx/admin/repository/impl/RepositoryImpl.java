@@ -1,87 +1,83 @@
-/*******************************************************************************
- * Copyright 2016 JSL Solucoes LTDA - https://jslsolucoes.com
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *******************************************************************************/
 package com.jslsolucoes.nginx.admin.repository.impl;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.util.List;
 
+import javax.persistence.EntityManager;
 import javax.persistence.Id;
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.hibernate.Criteria;
-import org.hibernate.Session;
-import org.hibernate.criterion.Property;
-
-import com.jslsolucoes.nginx.admin.error.NginxAdminRuntimeException;
 
 import net.vidageek.mirror.dsl.Mirror;
+import net.vidageek.mirror.list.dsl.Matcher;
 
 public abstract class RepositoryImpl<T> {
 
-	protected Session session;
+	protected EntityManager entityManager;
 	private Class<T> clazz;
 
 	public RepositoryImpl() {
-		// default constructor
+
 	}
 
 	@SuppressWarnings("unchecked")
-	public RepositoryImpl(Session session) {
+	public RepositoryImpl(EntityManager entityManager) {
 		this.clazz = (Class<T>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0];
-		this.session = session;
+		this.entityManager = entityManager;
 	}
 
 	public List<T> listAll() {
 		return listAll(null, null);
 	}
 
-	@SuppressWarnings("unchecked")
 	public List<T> listAll(Integer firstResult, Integer maxResults) {
-		Criteria criteria = session.createCriteria(clazz);
+
+		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+		CriteriaQuery<T> criteriaQuery = criteriaBuilder.createQuery(clazz);
+		criteriaQuery.select(criteriaQuery.from(clazz));
+		TypedQuery<T> query = entityManager.createQuery(criteriaQuery);
 		if (firstResult != null && maxResults != null) {
-			criteria.setFirstResult(firstResult).setMaxResults(maxResults);
+			query.setFirstResult(firstResult).setMaxResults(maxResults);
 		}
-		return criteria.list();
+		return query.getResultList();
 	}
 
 	public T load(T entity) {
 		return load(id(entity));
 	}
 
-	@SuppressWarnings("unchecked")
 	public T load(Long id) {
-		return (T) session.load(clazz, id);
+		return (T) entityManager.find(clazz, id);
 	}
 
 	public OperationType insert(T entity) {
-		this.session.persist(entity);
+		this.entityManager.persist(entity);
 		return OperationType.INSERT;
 	}
 
 	public OperationType update(T entity) {
-		this.session.merge(entity);
+		this.entityManager.merge(entity);
 		return OperationType.UPDATE;
 	}
 
 	private Long id(T entity) {
-		List<Field> fields = new Mirror().on(clazz).reflectAll().fields()
-				.matching(field -> field.isAnnotationPresent(Id.class));
+		Matcher<Field> matcher = new Matcher<Field>() {
+			@Override
+			public boolean accepts(Field field) {
+				return field.isAnnotationPresent(Id.class);
+			}
+		};
+		List<Field> fields = new Mirror().on(clazz).reflectAll().fields().matching(matcher);
 		if (CollectionUtils.isEmpty(fields)) {
-			throw new NginxAdminRuntimeException("Class" + this.clazz + " doesn't have @Id annotation");
+			try {
+				throw new Exception("Class" + this.clazz + " doesn't have @Id annotation");
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 		return (Long) new Mirror().on(entity).invoke().getterFor(fields.get(0));
 	}
@@ -91,7 +87,7 @@ public abstract class RepositoryImpl<T> {
 	}
 
 	public OperationType delete(T entity) {
-		this.session.delete(load(entity));
+		this.entityManager.remove(load(entity));
 		return OperationType.DELETE;
 	}
 
@@ -104,10 +100,11 @@ public abstract class RepositoryImpl<T> {
 		}
 	}
 
-	public Integer count() {
-		Criteria criteria = session.createCriteria(clazz);
-		criteria.setProjection(Property.forName("id"));
-		return ((Long) criteria.uniqueResult()).intValue();
+	public Long count() {
+		CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+		CriteriaQuery<Long> criteriaQuery = builder.createQuery(Long.class);
+		criteriaQuery.select(builder.count(criteriaQuery.from(clazz).get("id")));
+		return entityManager.createQuery(criteriaQuery).getSingleResult();
 	}
 
 	public void flushAndClear() {
@@ -116,11 +113,11 @@ public abstract class RepositoryImpl<T> {
 	}
 
 	public void flush() {
-		this.session.flush();
+		this.entityManager.flush();
 	}
 
 	public void clear() {
-		this.session.clear();
+		this.entityManager.clear();
 	}
 
 }

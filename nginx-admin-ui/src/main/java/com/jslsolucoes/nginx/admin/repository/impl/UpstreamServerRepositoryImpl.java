@@ -30,7 +30,7 @@ import com.jslsolucoes.nginx.admin.model.UpstreamServer;
 import com.jslsolucoes.nginx.admin.repository.UpstreamServerRepository;
 
 @RequestScoped
-public class UpstreamServerRepositoryImpl extends RepositoryImpl<UpstreamServer> implements UpstreamServerRepository {
+public class UpstreamServerRepositoryImpl extends HibernateRepositoryImpl<UpstreamServer> implements UpstreamServerRepository {
 
 	public UpstreamServerRepositoryImpl() {
 		// Default constructor

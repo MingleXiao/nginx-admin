@@ -24,7 +24,7 @@ import com.jslsolucoes.nginx.admin.model.AccessLog;
 import com.jslsolucoes.nginx.admin.repository.AccessLogRepository;
 
 @RequestScoped
-public class AccessLogRepositoryImpl extends RepositoryImpl<AccessLog> implements AccessLogRepository {
+public class AccessLogRepositoryImpl extends HibernateRepositoryImpl<AccessLog> implements AccessLogRepository {
 
 	public AccessLogRepositoryImpl() {
 		// Default constructor
