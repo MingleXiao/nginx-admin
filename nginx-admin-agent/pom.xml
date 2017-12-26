@@ -10,7 +10,7 @@
 	</parent>
 	<artifactId>nginx-admin-agent</artifactId>
 	<packaging>war</packaging>
-	
+
 	<dependencies>
 		<dependency>
 			<groupId>javax</groupId>
@@ -19,10 +19,30 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>2.6</version>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>1.7.25</version>
+		</dependency>
+		<dependency>
+			<groupId>org.zeroturnaround</groupId>
+			<artifactId>zt-exec</artifactId>
+			<version>1.9</version>
+		</dependency>
+		<dependency>
+			<groupId>commons-lang</groupId>
+			<artifactId>commons-lang</artifactId>
+			<version>2.6</version>
+		</dependency>
+		<dependency>
 			<groupId>com.jslsolucoes</groupId>
 			<artifactId>nginx-admin-agent-model</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 	</dependencies>
-	
+
 </project>

@@ -7,6 +7,8 @@ import java.util.concurrent.ThreadFactory;
 public class NginxAgentClientBuilder {
 
 	private final ScheduledExecutorService scheduledExecutorService;
+	private String endpoint;
+	private String bin;
 	
 	private NginxAgentClientBuilder() {
 		this.scheduledExecutorService = Executors.newScheduledThreadPool(1,new ThreadFactory() {
@@ -22,7 +24,17 @@ public class NginxAgentClientBuilder {
 	}
 
 	public NginxAgentClient build() {
-		return new NginxAgentClient(scheduledExecutorService);
+		return new NginxAgentClient(scheduledExecutorService,endpoint,bin);
+	}
+
+	public NginxAgentClientBuilder withEndpoint(String endpoint) {
+		this.endpoint = endpoint;
+		return this;
+	}
+	
+	public NginxAgentClientBuilder withBin(String bin) {
+		this.bin = bin;
+		return this;
 	}
 
 }
