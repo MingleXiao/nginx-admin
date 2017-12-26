@@ -15,7 +15,9 @@
  *******************************************************************************/
 package com.jslsolucoes.nginx.admin.repository;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.sql.SQLException;
 import java.util.List;
 
 import org.joda.time.LocalDate;
@@ -23,12 +25,14 @@ import org.joda.time.LocalTime;
 
 import com.jslsolucoes.nginx.admin.model.VirtualHostAlias;
 
+import net.sf.jasperreports.engine.JRException;
+
 public interface ReportRepository {
 
 	public List<String> validateBeforeSearch(List<VirtualHostAlias> aliases, LocalDate from, LocalTime fromTime,
 			LocalDate to, LocalTime toTime);
 
 	public InputStream statistics(List<VirtualHostAlias> aliases, LocalDate from, LocalTime fromTime, LocalDate to,
-			LocalTime toTime);
+			LocalTime toTime) throws JRException, SQLException, IOException;
 
 }

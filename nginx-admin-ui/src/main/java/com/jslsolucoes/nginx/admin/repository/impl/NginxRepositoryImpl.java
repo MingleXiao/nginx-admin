@@ -27,11 +27,13 @@ import java.util.jar.JarEntry;
 
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
+import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
-import org.hibernate.Criteria;
-import org.hibernate.Session;
 import org.jboss.vfs.VirtualFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,7 +45,7 @@ import com.jslsolucoes.nginx.admin.repository.NginxRepository;
 import com.jslsolucoes.nginx.admin.template.TemplateProcessor;
 
 @RequestScoped
-public class NginxRepositoryImpl extends HibernateRepositoryImpl<Nginx> implements NginxRepository {
+public class NginxRepositoryImpl extends RepositoryImpl<Nginx> implements NginxRepository {
 
 	private static Logger logger = LoggerFactory.getLogger(LogRepositoryImpl.class);
 
@@ -52,14 +54,20 @@ public class NginxRepositoryImpl extends HibernateRepositoryImpl<Nginx> implemen
 	}
 
 	@Inject
-	public NginxRepositoryImpl(Session session) {
-		super(session);
+	public NginxRepositoryImpl(EntityManager entityManager) {
+		super(entityManager);
 	}
 
 	@Override
 	public Nginx configuration() {
-		Criteria criteria = session.createCriteria(Nginx.class);
-		return (Nginx) criteria.uniqueResult();
+		try {
+			CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+			CriteriaQuery<Nginx> criteriaQuery = criteriaBuilder.createQuery(Nginx.class);
+			criteriaQuery.select(criteriaQuery.from(Nginx.class));
+			return entityManager.createQuery(criteriaQuery).getSingleResult();
+		} catch (NoResultException noResultException) {
+			return null;
+		}
 	}
 
 	@Override

@@ -27,18 +27,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import javax.annotation.Resource;
 import javax.enterprise.context.RequestScoped;
 import javax.imageio.ImageIO;
 import javax.inject.Inject;
+import javax.sql.DataSource;
 
 import org.apache.commons.lang.StringUtils;
-import org.hibernate.Session;
-import org.hibernate.jdbc.ReturningWork;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
 
 import com.google.common.collect.Lists;
@@ -56,17 +54,17 @@ import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput;
 @RequestScoped
 public class ReportRepositoryImpl implements ReportRepository {
 
-	private Session session;
+	@Resource(name="java:jboss/datasources/nginx-admin")
+	private DataSource dataSource;
+	
 	private VirtualHostAliasRepository virtualHostAliasRepository;
-	private static Logger logger = LoggerFactory.getLogger(ReportRepository.class);
 
 	public ReportRepositoryImpl() {
 		// Default constructor
 	}
 
 	@Inject
-	public ReportRepositoryImpl(Session session, VirtualHostAliasRepository virtualHostAliasRepository) {
-		this.session = session;
+	public ReportRepositoryImpl(VirtualHostAliasRepository virtualHostAliasRepository) {
 		this.virtualHostAliasRepository = virtualHostAliasRepository;
 	}
 
@@ -105,28 +103,21 @@ public class ReportRepositoryImpl implements ReportRepository {
 
 	@Override
 	public InputStream statistics(List<VirtualHostAlias> aliases, LocalDate from, LocalTime fromTime, LocalDate to,
-			LocalTime toTime) {
-		return session.doReturningWork(new ReturningWork<InputStream>() {
-			@Override
-			public InputStream execute(Connection connection) throws SQLException {
-				try {
-					Map<String, Object> parameters = defaultParameters();
-					parameters.put("FROM", start(from, fromTime));
-					parameters.put("TO", end(to, toTime));
-					parameters
-							.put("ALIASES",
-									StringUtils
-											.join(aliases.stream()
-													.map(virtualHostAlias -> "'" + virtualHostAliasRepository
-															.load(virtualHostAlias).getAlias() + "'")
-													.collect(Collectors.toSet()), ","));
-					return export("statistics", parameters, connection);
-				} catch (JRException | IOException exception) {
-					logger.error("Could not render report", exception);
-					return null;
-				}
-			}
-		});
+			LocalTime toTime) throws JRException, SQLException, IOException {
+		
+		Connection connection = dataSource.getConnection();
+		Map<String, Object> parameters = defaultParameters();
+		parameters.put("FROM", start(from, fromTime));
+		parameters.put("TO", end(to, toTime));
+		parameters
+				.put("ALIASES",
+						StringUtils
+								.join(aliases.stream()
+										.map(virtualHostAlias -> "'" + virtualHostAliasRepository
+												.load(virtualHostAlias).getAlias() + "'")
+										.collect(Collectors.toSet()), ","));
+		return export("statistics", parameters, connection);
+				
 	}
 
 	private InputStream export(String jasper, Map<String, Object> parameters, Connection connection)

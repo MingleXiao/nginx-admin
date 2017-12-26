@@ -23,16 +23,20 @@ import java.util.stream.Collectors;
 
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
+import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 
 import org.apache.commons.io.FileUtils;
-import org.hibernate.Criteria;
-import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 
 import com.jslsolucoes.nginx.admin.error.NginxAdminException;
 import com.jslsolucoes.nginx.admin.i18n.Messages;
 import com.jslsolucoes.nginx.admin.model.Upstream;
 import com.jslsolucoes.nginx.admin.model.UpstreamServer;
+import com.jslsolucoes.nginx.admin.model.Upstream_;
 import com.jslsolucoes.nginx.admin.repository.NginxRepository;
 import com.jslsolucoes.nginx.admin.repository.ResourceIdentifierRepository;
 import com.jslsolucoes.nginx.admin.repository.UpstreamRepository;
@@ -40,7 +44,7 @@ import com.jslsolucoes.nginx.admin.repository.UpstreamServerRepository;
 import com.jslsolucoes.nginx.admin.template.TemplateProcessor;
 
 @RequestScoped
-public class UpstreamRepositoryImpl extends HibernateRepositoryImpl<Upstream> implements UpstreamRepository {
+public class UpstreamRepositoryImpl extends RepositoryImpl<Upstream> implements UpstreamRepository {
 
 	private UpstreamServerRepository upstreamServerRepository;
 	private NginxRepository nginxRepository;
@@ -51,9 +55,9 @@ public class UpstreamRepositoryImpl extends HibernateRepositoryImpl<Upstream> im
 	}
 
 	@Inject
-	public UpstreamRepositoryImpl(Session session, UpstreamServerRepository upstreamServerRepository,
+	public UpstreamRepositoryImpl(EntityManager entityManager, UpstreamServerRepository upstreamServerRepository,
 			NginxRepository nginxRepository, ResourceIdentifierRepository resourceIdentifierRepository) {
-		super(session);
+		super(entityManager);
 		this.upstreamServerRepository = upstreamServerRepository;
 		this.nginxRepository = nginxRepository;
 		this.resourceIdentifierRepository = resourceIdentifierRepository;
@@ -111,18 +115,34 @@ public class UpstreamRepositoryImpl extends HibernateRepositoryImpl<Upstream> im
 
 	@Override
 	public Upstream hasEquals(Upstream upstream) {
-		Criteria criteria = session.createCriteria(Upstream.class);
-		criteria.add(Restrictions.eq("name", upstream.getName()));
-		if (upstream.getId() != null) {
-			criteria.add(Restrictions.ne("id", upstream.getId()));
+		try {
+			CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+			CriteriaQuery<Upstream> criteriaQuery = criteriaBuilder.createQuery(Upstream.class);
+			Root<Upstream> root = criteriaQuery.from(Upstream.class);
+			List<Predicate> predicates = new ArrayList<>();
+			predicates.add(criteriaBuilder.equal(root.get(Upstream_.name), upstream.getName()));
+			if (upstream.getId() != null) {
+				predicates.add(criteriaBuilder.notEqual(root.get(Upstream_.id), upstream.getId()));
+			}
+			criteriaQuery.where(predicates.toArray(new Predicate[] {}));
+			return entityManager.createQuery(criteriaQuery).getSingleResult();
+		} catch (NoResultException noResultException) {
+			return null;
 		}
-		return (Upstream) criteria.uniqueResult();
 	}
 
 	@Override
 	public Upstream findByName(String name) {
-		Criteria criteria = session.createCriteria(Upstream.class);
-		criteria.add(Restrictions.eq("name", name));
-		return (Upstream) criteria.uniqueResult();
+		try {
+			CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+			CriteriaQuery<Upstream> criteriaQuery = criteriaBuilder.createQuery(Upstream.class);
+			Root<Upstream> root = criteriaQuery.from(Upstream.class);	
+			criteriaQuery.where(
+					criteriaBuilder.equal(root.get(Upstream_.name), name)
+			);
+			return entityManager.createQuery(criteriaQuery).getSingleResult();
+		} catch (NoResultException noResultException) {
+			return null;
+		}
 	}
 }

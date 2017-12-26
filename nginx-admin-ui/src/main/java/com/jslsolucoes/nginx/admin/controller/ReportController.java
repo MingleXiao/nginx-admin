@@ -16,6 +16,7 @@
 package com.jslsolucoes.nginx.admin.controller;
 
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,6 +37,7 @@ import br.com.caelum.vraptor.Path;
 import br.com.caelum.vraptor.Post;
 import br.com.caelum.vraptor.Result;
 import br.com.caelum.vraptor.view.Results;
+import net.sf.jasperreports.engine.JRException;
 
 @Controller
 @Path("report")
@@ -73,7 +75,7 @@ public class ReportController {
 	@Post
 	@Path("export.pdf")
 	public void export(List<Long> aliases, LocalDate from, LocalTime fromTime, LocalDate to, LocalTime toTime)
-			throws IOException {
+			throws IOException, JRException, SQLException {
 		httpServletResponse.setContentType("application/pdf");
 		IOUtils.copy(reportRepository.statistics(convert(aliases), from, fromTime, to, toTime),
 				httpServletResponse.getOutputStream());

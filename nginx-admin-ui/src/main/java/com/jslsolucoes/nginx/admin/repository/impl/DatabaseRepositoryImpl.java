@@ -23,13 +23,13 @@ import java.util.Arrays;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import javax.annotation.Resource;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
+import javax.sql.DataSource;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
-import org.hibernate.Session;
-import org.hibernate.jdbc.Work;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,7 +40,8 @@ import com.jslsolucoes.nginx.admin.repository.DatabaseRepository;
 @RequestScoped
 public class DatabaseRepositoryImpl implements DatabaseRepository {
 
-	private Session session;
+	@Resource(name="java:jboss/datasources/nginx-admin")
+	private DataSource dataSource;
 	private ConfigurationRepository configurationRepository;
 	private Properties properties;
 	private static Logger logger = LoggerFactory.getLogger(LogRepositoryImpl.class);
@@ -50,26 +51,27 @@ public class DatabaseRepositoryImpl implements DatabaseRepository {
 	}
 
 	@Inject
-	public DatabaseRepositoryImpl(@Application Properties properties, Session session,
+	public DatabaseRepositoryImpl(@Application Properties properties,
 			ConfigurationRepository configurationRepository) {
 		this.properties = properties;
-		this.session = session;
 		this.configurationRepository = configurationRepository;
 	}
 
 	@Override
 	public void installOrUpgrade() throws IOException {
-		AtomicInteger installed = new AtomicInteger(installed());
-		while (installed.get() < actual()) {
-			Arrays.asList(resource("/sql/" + installed.incrementAndGet() + ".sql").split(";")).stream()
-					.filter(StringUtils::isNotEmpty).forEach(statement -> session.doWork(new Work() {
-						@Override
-						public void execute(Connection connection) throws SQLException {
-							try (PreparedStatement preparedStatement = connection.prepareStatement(statement)) {
-								preparedStatement.executeUpdate();
+		AtomicInteger version = new AtomicInteger(installed());
+		while (version.get() < actual()) {
+			Arrays.asList(resource("/sql/" + version.incrementAndGet() + ".sql").split(";")).stream()
+					.filter(StringUtils::isNotEmpty).forEach(statement -> {
+							try {
+								Connection connection = dataSource.getConnection();
+								try (PreparedStatement preparedStatement = connection.prepareStatement(statement)) {
+									preparedStatement.executeUpdate();
+								}
+							} catch (SQLException e) {
+								logger.error("Could not execute statement",e);
 							}
-						}
-					}));
+					});
 		}
 	}
 
