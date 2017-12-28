@@ -143,7 +143,7 @@ public class UserRepositoryImpl extends RepositoryImpl<User> implements UserRepo
 			CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
 		    CriteriaQuery<User> criteriaQuery = criteriaBuilder.createQuery(User.class);
 		    Root<User> root = criteriaQuery.from(User.class);
-		    criteriaQuery.where(criteriaBuilder.equal(root.get(User_.id), user.getLogin()));
+		    criteriaQuery.where(criteriaBuilder.equal(root.get(User_.id), user.getId()));
 		    return entityManager.createQuery(criteriaQuery).getSingleResult();
 		} catch (NoResultException noResultException) {
 		    return null;

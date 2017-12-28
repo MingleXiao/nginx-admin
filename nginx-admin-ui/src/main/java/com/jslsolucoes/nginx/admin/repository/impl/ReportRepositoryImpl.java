@@ -54,7 +54,7 @@ import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput;
 @RequestScoped
 public class ReportRepositoryImpl implements ReportRepository {
 
-	@Resource(name="java:jboss/datasources/nginx-admin")
+	@Resource(mappedName="java:jboss/datasources/nginx-admin")
 	private DataSource dataSource;
 	
 	private VirtualHostAliasRepository virtualHostAliasRepository;
@@ -104,7 +104,6 @@ public class ReportRepositoryImpl implements ReportRepository {
 	@Override
 	public InputStream statistics(List<VirtualHostAlias> aliases, LocalDate from, LocalTime fromTime, LocalDate to,
 			LocalTime toTime) throws JRException, SQLException, IOException {
-		
 		Connection connection = dataSource.getConnection();
 		Map<String, Object> parameters = defaultParameters();
 		parameters.put("FROM", start(from, fromTime));
@@ -116,7 +115,9 @@ public class ReportRepositoryImpl implements ReportRepository {
 										.map(virtualHostAlias -> "'" + virtualHostAliasRepository
 												.load(virtualHostAlias).getAlias() + "'")
 										.collect(Collectors.toSet()), ","));
-		return export("statistics", parameters, connection);
+		InputStream inputStream = export("statistics", parameters, connection);
+		connection.close();
+		return inputStream;
 				
 	}
 

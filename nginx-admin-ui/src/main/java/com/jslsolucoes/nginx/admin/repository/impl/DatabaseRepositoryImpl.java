@@ -18,7 +18,6 @@ package com.jslsolucoes.nginx.admin.repository.impl;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -26,6 +25,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import javax.annotation.Resource;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
+import javax.persistence.EntityManager;
 import javax.sql.DataSource;
 
 import org.apache.commons.io.IOUtils;
@@ -34,14 +34,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.jslsolucoes.nginx.admin.annotation.Application;
+import com.jslsolucoes.nginx.admin.error.NginxAdminRuntimeException;
 import com.jslsolucoes.nginx.admin.repository.ConfigurationRepository;
 import com.jslsolucoes.nginx.admin.repository.DatabaseRepository;
 
 @RequestScoped
 public class DatabaseRepositoryImpl implements DatabaseRepository {
 
-	@Resource(name="java:jboss/datasources/nginx-admin")
-	private DataSource dataSource;
+	private EntityManager entityManager;
 	private ConfigurationRepository configurationRepository;
 	private Properties properties;
 	private static Logger logger = LoggerFactory.getLogger(LogRepositoryImpl.class);
@@ -51,39 +51,41 @@ public class DatabaseRepositoryImpl implements DatabaseRepository {
 	}
 
 	@Inject
-	public DatabaseRepositoryImpl(@Application Properties properties,
-			ConfigurationRepository configurationRepository) {
+	public DatabaseRepositoryImpl(@Application Properties properties, ConfigurationRepository configurationRepository,
+			EntityManager entityManager) {
 		this.properties = properties;
 		this.configurationRepository = configurationRepository;
+		this.entityManager = entityManager;
 	}
 
 	@Override
-	public void installOrUpgrade() throws IOException {
+	public void installOrUpgrade() {
 		AtomicInteger version = new AtomicInteger(installed());
-		while (version.get() < actual()) {
+		while (version.get() < actual()) {	
 			Arrays.asList(resource("/sql/" + version.incrementAndGet() + ".sql").split(";")).stream()
 					.filter(StringUtils::isNotEmpty).forEach(statement -> {
-							try {
-								Connection connection = dataSource.getConnection();
-								try (PreparedStatement preparedStatement = connection.prepareStatement(statement)) {
-									preparedStatement.executeUpdate();
-								}
-							} catch (SQLException e) {
-								logger.error("Could not execute statement",e);
-							}
+						try {
+							entityManager.createNativeQuery(statement).executeUpdate();
+						} catch (Exception e) {
+							logger.error("Could not execute statement " + statement,e);
+						}
 					});
 		}
 	}
 
-	private String resource(String path) throws IOException {
-		return IOUtils.toString(getClass().getResourceAsStream(path), "UTF-8");
+	private String resource(String path) {
+		try {
+			return IOUtils.toString(getClass().getResourceAsStream(path), "UTF-8");
+		} catch (IOException e) {
+			throw new NginxAdminRuntimeException(e);
+		}
 	}
 
 	public Integer installed() {
 		try {
 			return configurationRepository.integer(ConfigurationType.DB_VERSION);
 		} catch (Exception exception) {
-			logger.error("Database is not installed", exception);
+			logger.warn("Database is not installed");
 			return 0;
 		}
 	}

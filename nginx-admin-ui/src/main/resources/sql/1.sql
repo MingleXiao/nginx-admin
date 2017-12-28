@@ -107,6 +107,3 @@ alter table admin.virtual_domain add constraint virtual_domain_uk1 unique(domain
 alter table admin.virtual_domain add constraint virtual_domain_fk1 foreign key(id_ssl_certificate) references admin.ssl_certificate(id);
 alter table admin.virtual_domain add constraint virtual_domain_fk2 foreign key(id_upstream) references admin.upstream(id);
 alter table admin.virtual_domain add constraint virtual_domain_fk3 foreign key(id_resource_identifier) references admin.resource_identifier(id);
-
-
-commit;

@@ -45,7 +45,12 @@ public class DatabaseController {
 	}
 
 	public void installOrUpgrade() throws IOException {
-		databaseRepository.installOrUpgrade();
+		try {
+			databaseRepository.installOrUpgrade();
+		} catch (Exception e) {
+			System.out.println("Deu ruim");
+			e.printStackTrace();
+		}
 		this.result.redirectTo(UserController.class).login();
 	}
 }
