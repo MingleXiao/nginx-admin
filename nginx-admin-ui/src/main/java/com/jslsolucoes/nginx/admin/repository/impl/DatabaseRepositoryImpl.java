@@ -16,17 +16,13 @@
 package com.jslsolucoes.nginx.admin.repository.impl;
 
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.util.Arrays;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import javax.annotation.Resource;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
-import javax.sql.DataSource;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
@@ -44,7 +40,7 @@ public class DatabaseRepositoryImpl implements DatabaseRepository {
 	private EntityManager entityManager;
 	private ConfigurationRepository configurationRepository;
 	private Properties properties;
-	private static Logger logger = LoggerFactory.getLogger(LogRepositoryImpl.class);
+	private static Logger logger = LoggerFactory.getLogger(DatabaseRepositoryImpl.class);
 
 	public DatabaseRepositoryImpl() {
 		// Default constructor
